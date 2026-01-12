@@ -1,0 +1,46 @@
+version: '3.8'
+
+services:
+  # 1. THE DATABASE (Postgres)
+  postgres:
+    image: postgres:15-alpine
+    container_name: edumall_db
+    environment:
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASS}
+      POSTGRES_DB: ${DB_NAME}
+    healthcheck:
+      # FIX: This tells Docker how to check if Postgres is actually ready
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER} -d ${DB_NAME}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  # 2. THE MEMORY (Redis)
+  redis:
+    image: redis:7-alpine
+    container_name: edumall_cache
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
+  # 3. THE BACKEND (Node.js)
+  backend:
+    build: ./backend
+    container_name: edumall_backend
+    environment:
+      - NODE_ENV=${NODE_ENV}
+      - DB_HOST=postgres
+      - REDIS_HOST=redis
+    depends_on:
+      postgres:
+        condition: service_healthy # FIX: Wait for DB to be healthy
+      redis:
+        condition: service_healthy # FIX: Wait for Redis to be healthy
+
+volumes:
+  postgres_data:

@@ -1,0 +1,26 @@
+# 1. Use a lightweight, secure version of Node.js
+FROM node:20-alpine
+
+# 2. Set the "Home" directory for the app
+WORKDIR /usr/src/app
+
+# 3. Copy only the "Shopping List" first
+COPY package*.json ./
+
+# 4. Install only what we need and clean up junk
+RUN npm install && npm cache clean --force
+
+# 5. Copy the rest of our code
+COPY . .
+
+# 6. FIX: Grant the "node" user ownership of the files
+RUN chown -R node:node /usr/src/app
+
+# 7. FIX: Stop being a "Super-Admin" (Root). Switch to a regular user.
+USER node
+
+# 8. Open the door for traffic
+EXPOSE 3000
+
+# 9. Start the engine
+CMD ["npm", "start"]
