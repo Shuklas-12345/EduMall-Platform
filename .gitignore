@@ -1,0 +1,25 @@
+# OS files
+.DS_Store
+__MACOSX/
+
+# Node
+node_modules/
+npm-debug.log*
+yarn-error.log*
+
+# Environment files
+.env
+.env.*
+env.txt
+
+# Build output
+dist/
+build/
+coverage/
+
+# IDE
+.vscode/
+.idea/
+
+# Logs
+*.log
